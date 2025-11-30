@@ -1,49 +1,58 @@
-import com.codeborne.selenide.SelenideElement;
 import com.github.javafaker.Faker;
-import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
+import lombok.Value;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-
-import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Condition.visible;
-import static com.codeborne.selenide.Selenide.*;
+import java.util.Random;
 
 public class DataGenerator {
-
-    private final Faker faker = new Faker(new Locale("ru"));
-
-    public String generateData(int day, String pattern) {
-        return LocalDate.now().plusDays(day).format(DateTimeFormatter.ofPattern(pattern));
+    private static Faker faker;
+    private DataGenerator() {
     }
 
-    @Test
-    void shouldRegisteredAccount() {
-        String name = faker.name().fullName();
-        String city = faker.address().city();
-        String phone = faker.phoneNumber().phoneNumber();
-        SelenideElement form = $("form");
-        open("http://localhost:9999/");
+    public static String generateDate(int shift) {
+        LocalDate date = LocalDate.now().plusDays(shift);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        return date.format(formatter);
+    }
 
-        $("[name='name']").setValue(name);
-        $("[placeholder='Город']").setValue(city);
+    public static String generateCity(Faker faker) {
+        String[] cities = {
+                "Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань",
+                "Нижний Новгород", "Челябинск", "Самара", "Омск", "Ростов-на-Дону"
+        };
+        Random random = new Random();
+        return cities[random.nextInt(cities.length)];
+    }
 
-        String date = generateData(3, "dd.MM.yyyy");
+    public static String generateName(Faker faker) {
+        return faker.name().fullName();
+    }
 
-        form.$(By.cssSelector("[data-test-id='date'] input")).press(Keys.chord(Keys.SHIFT, Keys.HOME, Keys.BACK_SPACE)).sendKeys(generateData(3, "dd.MM.yyyy"));
-//        $("[type='date']").setValue(date);
-        $("[name='phone']").setValue(phone);
-        $("[data-test-id='agreement']").click();
-        $$("button").find(text("Запланировать")).click();
-        $("div.notification__title").shouldHave(text("Успешно"), Duration.ofSeconds(15));
-        $(".notification__content").shouldHave(text("Встреча успешно запланирована на " + date), Duration.ofSeconds(15));
-//        $("div.notification__title").shouldHave(text("Необходимо подтверждение"), Duration.ofSeconds(15));
-//        $("div.notification__content").shouldHave(text("У вас уже запланирована встреча на другую дату. Перепланировать?"), Duration.ofSeconds(15));
-//        $$("button").find(text("Перепланировать")).click();
-//
+    public static String generatePhone(Faker faker) {
+        return faker.phoneNumber().cellPhone();
+    }
+
+    public static class Registration {
+        private static Faker faker;
+
+        private Registration() {
+        }
+
+        public static UserInfo generateUser(String locale) {
+            faker = new Faker(new Locale(locale));
+            String city = generateCity(faker);
+            String name = generateName(faker);
+            String phone = generatePhone(faker);
+            return new UserInfo(city, name, phone);
+        }
+    }
+
+    @Value
+    public static class UserInfo {
+        String city;
+        String name;
+        String phone;
     }
 }
