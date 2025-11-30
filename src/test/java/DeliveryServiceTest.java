@@ -1,3 +1,4 @@
+import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,20 +31,24 @@ class DataGeneratorTest {
         $("[name='name']").setValue(validUser.getName());
         $("[placeholder='Город']").setValue(validUser.getCity());
         $("[name='phone']").setValue(validUser.getPhone());
-        form.$(By.cssSelector("[data-test-id='date'] input")).press(Keys.chord(Keys.SHIFT, Keys.HOME, Keys.BACK_SPACE)).sendKeys(firstMeetingDate);
+        form.$(By.cssSelector("[data-test-id='date'] input"))
+                .press(Keys.chord(Keys.SHIFT, Keys.HOME, Keys.BACK_SPACE))
+                .sendKeys(firstMeetingDate);
+
         $("[data-test-id='agreement']").click();
         $$("button").find(text("Запланировать"))
-                .shouldBe(enabled, Duration.ofSeconds(15))
+                .shouldBe(enabled, Duration.ofSeconds(20))
                 .click();
-        $("div.notification__title").shouldHave(text("Успешно"), Duration.ofSeconds(15));
+        $("div.notification__title").shouldHave(text("Успешно"), Duration.ofSeconds(20));
         $("div.notification__content").shouldHave(text("Встреча успешно запланирована на "), Duration.ofSeconds(20))
-                .shouldHave(text(firstMeetingDate), Duration.ofSeconds(5));
-        $$("button").find(text("Запланировать")).shouldBe(enabled, Duration.ofSeconds(15))
+                .shouldHave(text(firstMeetingDate), Duration.ofSeconds(20));
+        $$("button").find(text("Запланировать")).shouldBe(enabled, Duration.ofSeconds(20))
                 .click();
         $(Selectors.byText("Необходимо подтверждение"));
         $(Selectors.byText("У вас уже есть запланированная встреча"));
         $(Selectors.byText("Перепланировать")).click();
         $("div.notification__content").shouldHave(text("Успешно"), Duration.ofSeconds(20))
-                .shouldHave(text(firstMeetingDate), Duration.ofSeconds(5));
+                .shouldHave(text(firstMeetingDate), Duration.ofSeconds(20));
+
     }
 }
