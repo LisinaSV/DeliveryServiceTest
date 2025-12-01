@@ -40,15 +40,20 @@ class DataGeneratorTest {
                 .shouldBe(enabled, Duration.ofSeconds(20))
                 .click();
         $("div.notification__title").shouldHave(text("Успешно"), Duration.ofSeconds(20));
-        $("div.notification__content").shouldHave(text("Встреча успешно запланирована на "), Duration.ofSeconds(20))
-                .shouldHave(text(firstMeetingDate), Duration.ofSeconds(20));
+        $("div.notification__content").shouldHave(text("Встреча успешно запланирована на " + firstMeetingDate), Duration.ofSeconds(20));
+        ;
         $$("button").find(text("Запланировать")).shouldBe(enabled, Duration.ofSeconds(20))
                 .click();
         $(Selectors.byText("Необходимо подтверждение"));
         $(Selectors.byText("У вас уже есть запланированная встреча"));
         $(Selectors.byText("Перепланировать")).click();
-        $("div.notification__content").shouldHave(text("Успешно"), Duration.ofSeconds(20))
-                .shouldHave(text(firstMeetingDate), Duration.ofSeconds(20));
+        form.$(By.cssSelector("[data-test-id='date'] input"))
+                .press(Keys.chord(Keys.SHIFT, Keys.HOME, Keys.BACK_SPACE))
+                .sendKeys(secondMeetingDate);
+        $("div.notification__title").shouldHave(text("Успешно"), Duration.ofSeconds(20));
+        $("div.notification__content").shouldHave(text("Встреча успешно запланирована на " + secondMeetingDate), Duration.ofSeconds(20));
+        ;
+
 
     }
 }
