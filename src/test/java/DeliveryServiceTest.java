@@ -1,4 +1,3 @@
-import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +11,7 @@ import java.time.Duration;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
 
-class DataGeneratorTest {
+class DeliveryServiceTest {
 
     @BeforeEach
     void setup() {
@@ -28,32 +27,31 @@ class DataGeneratorTest {
         var daysToAddForSecondMeeting = 7;
         var secondMeetingDate = DataGenerator.generateDate(daysToAddForSecondMeeting);
         SelenideElement form = $("form");
-        $("[name='name']").setValue(validUser.getName());
-        $("[placeholder='Город']").setValue(validUser.getCity());
-        $("[name='phone']").setValue(validUser.getPhone());
         form.$(By.cssSelector("[data-test-id='date'] input"))
                 .press(Keys.chord(Keys.SHIFT, Keys.HOME, Keys.BACK_SPACE))
                 .sendKeys(firstMeetingDate);
+        $("[name='name']").setValue(validUser.getName());
+        $("[placeholder='Город']").setValue(validUser.getCity());
+        $("[name='phone']").setValue(validUser.getPhone());
 
         $("[data-test-id='agreement']").click();
         $$("button").find(text("Запланировать"))
                 .shouldBe(enabled, Duration.ofSeconds(20))
                 .click();
         $("div.notification__title").shouldHave(text("Успешно"), Duration.ofSeconds(20));
-        $("div.notification__content").shouldHave(text("Встреча успешно запланирована на " + firstMeetingDate), Duration.ofSeconds(20));
-        ;
-        $$("button").find(text("Запланировать")).shouldBe(enabled, Duration.ofSeconds(20))
+        $("div.notification__content").shouldHave(text("Встреча успешно запланирована на " + firstMeetingDate)
+                , Duration.ofSeconds(20));
+        $("[data-test-id='date'] input").press(Keys.chord(Keys.SHIFT, Keys.HOME, Keys.BACK_SPACE));
+        $("[data-test-id='date'] input").setValue(secondMeetingDate);
+        $(Selectors.byText("Запланировать")).click();
+        $("[data-test-id='replan-notification'] div.notification__title")
+                .shouldHave(text(("Необходимо подтверждение")), Duration.ofSeconds(20));
+        $("[data-test-id='replan-notification'] div.notification__content")
+                .shouldHave(text("У вас уже запланирована встреча на другую дату. Перепланировать?"))
+                .shouldBe(visible);
+        $$("button").find(text("Перепланировать")).shouldBe(enabled, Duration.ofSeconds(20))
                 .click();
-        $(Selectors.byText("Необходимо подтверждение"));
-        $(Selectors.byText("У вас уже есть запланированная встреча"));
-        $(Selectors.byText("Перепланировать")).click();
-        form.$(By.cssSelector("[data-test-id='date'] input"))
-                .press(Keys.chord(Keys.SHIFT, Keys.HOME, Keys.BACK_SPACE))
-                .sendKeys(secondMeetingDate);
-        $("div.notification__title").shouldHave(text("Успешно"), Duration.ofSeconds(20));
         $("div.notification__content").shouldHave(text("Встреча успешно запланирована на " + secondMeetingDate), Duration.ofSeconds(20));
-        ;
-
 
     }
 }
